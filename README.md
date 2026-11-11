@@ -28,13 +28,21 @@ night/
 }
 ```
 
-`id` 必须和目录名相同。`name` 是显示名，最多 40 个字符。`preview` 和 `author` 可以不写；写了 `preview` 就只能是同目录的 `preview.png`。`htmlSha256` 这样算：
+`id` 必须和目录名相同。`name` 是显示名，最多 40 个字符。`version` 用三段数字，如 `1.0.0`，每次改页面都要往上加。`preview` 和 `author` 可以不写；写了 `preview` 就只能是同目录的 `preview.png`。`htmlSha256` 这样算：
 
 ```bash
 shasum -a 256 night/scene.html
 ```
 
 页面是一个不依赖外链的 HTML 文件，最大 1 MiB。
+
+## 更新一个场景
+
+更新就是改原来的目录，再提一个 PR。id 不变，应用靠 id 认出已安装的场景，合并后用户再装一次就是覆盖，不会装出第二个。
+
+版本号每次都要比已上架的大。只改文案加最后一位（`1.0.0` → `1.0.1`），加行为加中间一位（`1.1.0`），换掉用法加第一位（`2.0.0`）。`scene.html` 变了，`htmlSha256` 要一起重算。
+
+`nook://scene/<id>` 不带 commit，安装时取 `main` 的最新。所以旧链接在合并之后指向的就是新版本，不用换地址。
 
 ## 页面里可以做什么
 
@@ -53,6 +61,14 @@ shasum -a 256 night/scene.html
 - `parent`、`top`
 
 `data:` 图片可以用。预审只挡明显的写法，沙箱才是边界。
+
+## 页面拿得到什么
+
+沙箱给页面的只有音量和亮度。
+
+- 能读到输出音量的当前值、是否静音，以及内建屏亮度的当前值。没有内建屏时亮度不可用，页面会拿到一个不可用的状态，而不是别的数。
+- 能改这两项，改动作用于系统，不只是场景里的画面。
+- 读不到其他场景、文件、设备名和网络。页面出不去这个沙箱，也带不进来审核没看过的内容。
 
 ## 审核
 
@@ -77,13 +93,17 @@ night/
   preview.png
 ```
 
-`scene.json` has `id`, `name`, `version`, `description` and `htmlSha256`. `preview` and `author` are optional. `preview`, when present, is the file `preview.png` next to the page. `id` matches the directory name, `name` is at most 40 characters, and the page is one self-contained HTML file of at most 1 MiB.
+`scene.json` has `id`, `name`, `version`, `description` and `htmlSha256`. `preview` and `author` are optional. `preview`, when present, is the file `preview.png` next to the page. `id` matches the directory name, `name` is at most 40 characters, `version` is three numbers such as `1.0.0` and goes up whenever the page changes, and the page is one self-contained HTML file of at most 1 MiB.
 
 ```bash
 shasum -a 256 night/scene.html
 ```
 
-A catalog scene runs in a sandbox and can only change volume and brightness, through `Control.getVolume`, `setVolume`, `setMute`, `getBrightness`, `setBrightness`, `getState`, and `events.onStateChanged`. The page is refused if it uses `<script src>`, `<link href>`, an `http` or `https` image, `eval`, `new Function`, `document.write`, `import()`, `fetch`, `WebSocket`, `XMLHttpRequest`, or `parent` and `top` as a window. A `data:` image is fine. The text scan only catches the obvious; the sandbox is the boundary.
+To update a scene, change its directory and open another pull request. The id stays, so the app replaces the installed copy instead of adding a second one. The version must be greater than the published one: the last number for a small change (`1.0.0` to `1.0.1`), the middle for new behavior (`1.1.0`), the first when the way it works changes (`2.0.0`). Recompute `htmlSha256` when `scene.html` changes. A `nook://scene/<id>` link names no commit, so it installs whatever `main` has and needs no new address.
+
+A catalog scene runs in a sandbox and can only change volume and brightness, through `Control.getVolume`, `setVolume`, `setMute`, `getBrightness`, `setBrightness`, `getState`, and `events.onStateChanged`. The page can read the current output volume, whether it is muted, and the built-in display brightness, and setting them changes the system, not just the picture. It cannot read other scenes, files, device names or the network, and it cannot leave the sandbox. With no built-in display, brightness comes back unavailable rather than as some other number.
+
+The page is refused if it uses `<script src>`, `<link href>`, an `http` or `https` image, `eval`, `new Function`, `document.write`, `import()`, `fetch`, `WebSocket`, `XMLHttpRequest`, or `parent` and `top` as a window. A `data:` image is fine. The text scan only catches the obvious; the sandbox is the boundary.
 
 Every pull request runs `.github/workflows/review.yml`, which checks added and changed scenes with `review/check.mjs`. A scene that fails does not merge.
 
