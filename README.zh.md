@@ -76,7 +76,7 @@ shasum -a 256 night/scene.html
 
 改应用、修 bug、加控制项，去 [sliiu/nook](https://github.com/sliiu/nook)。
 
-已上架的场景列在 [场景页](https://sliiu.github.io/nook-scenes/)。安装按钮指向 `nook://scene/<id>`。
+已上架的场景列在 [Nook 的页面](https://sliiu.github.io/nook/)。安装按钮指向 `nook://scene/<id>`。
 
 ## 支持
 

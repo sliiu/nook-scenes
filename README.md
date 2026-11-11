@@ -76,7 +76,7 @@ Every pull request runs `.github/workflows/review.yml`. It checks added and chan
 
 App changes, bug fixes and new controls go to [sliiu/nook](https://github.com/sliiu/nook).
 
-Published scenes are listed on the [scene page](https://sliiu.github.io/nook-scenes/). The install button points at `nook://scene/<id>`.
+Published scenes are listed on the [Nook page](https://sliiu.github.io/nook/). The install button points at `nook://scene/<id>`.
 
 ## Support
 
