@@ -22,11 +22,13 @@ night/
   "name": "Night",
   "version": "1.0.0",
   "description": "一句话说明这个场景",
-  "htmlSha256": "小写十六进制，是 scene.html 原文件的 SHA-256"
+  "htmlSha256": "小写十六进制，是 scene.html 原文件的 SHA-256",
+  "preview": "preview.png",
+  "author": "你的名字"
 }
 ```
 
-`id` 必须和目录名相同。`name` 是显示名，最多 40 个字符。`htmlSha256` 这样算：
+`id` 必须和目录名相同。`name` 是显示名，最多 40 个字符。`preview` 和 `author` 可以不写；写了 `preview` 就只能是同目录的 `preview.png`。`htmlSha256` 这样算：
 
 ```bash
 shasum -a 256 night/scene.html
@@ -57,3 +59,32 @@ shasum -a 256 night/scene.html
 每个 PR 会跑 `.github/workflows/review.yml`。它用本仓库的 `review/check.mjs` 扫新增和改动的场景，规则和应用安装时的校验是同一套。没过的不合并。
 
 改应用、修 bug、加控制项，去 [sliiu/nook](https://github.com/sliiu/nook)。
+
+已上架的场景列在 [场景页](https://sliiu.github.io/nook-scenes/)。安装按钮指向 `nook://scene/<id>`。
+
+## English
+
+This is the Nook scene catalog. It holds scenes, not the app. A scene is published only when its pull request merges into `main`.
+
+The app installs from this repository only, through `nook://scene/<id>`. It fetches the files at the merged commit and checks `htmlSha256`.
+
+One scene is one directory, named with its id: lowercase letters, digits and hyphens, 2 to 40 characters, not starting or ending with a hyphen.
+
+```text
+night/
+  scene.json
+  scene.html
+  preview.png
+```
+
+`scene.json` has `id`, `name`, `version`, `description` and `htmlSha256`. `preview` and `author` are optional. `preview`, when present, is the file `preview.png` next to the page. `id` matches the directory name, `name` is at most 40 characters, and the page is one self-contained HTML file of at most 1 MiB.
+
+```bash
+shasum -a 256 night/scene.html
+```
+
+A catalog scene runs in a sandbox and can only change volume and brightness, through `Control.getVolume`, `setVolume`, `setMute`, `getBrightness`, `setBrightness`, `getState`, and `events.onStateChanged`. The page is refused if it uses `<script src>`, `<link href>`, an `http` or `https` image, `eval`, `new Function`, `document.write`, `import()`, `fetch`, `WebSocket`, `XMLHttpRequest`, or `parent` and `top` as a window. A `data:` image is fine. The text scan only catches the obvious; the sandbox is the boundary.
+
+Every pull request runs `.github/workflows/review.yml`, which checks added and changed scenes with `review/check.mjs`. A scene that fails does not merge.
+
+App changes go to [sliiu/nook](https://github.com/sliiu/nook). Published scenes are listed on the [scene page](https://sliiu.github.io/nook-scenes/).
