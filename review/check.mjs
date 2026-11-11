@@ -102,7 +102,7 @@ function check(id, metaRaw, html) {
   } catch {
     return fail(id, "scene.json 不是 JSON")
   }
-  const allowed = ["id", "name", "version", "description", "htmlSha256"]
+  const allowed = ["id", "name", "version", "description", "htmlSha256", "preview", "author"]
   for (const key of Object.keys(meta)) {
     if (!allowed.includes(key)) return fail(id, `scene.json 有多余字段 ${key}`)
   }
@@ -113,6 +113,10 @@ function check(id, metaRaw, html) {
     return fail(id, "version 为空或超过 32 个字符")
   }
   if (typeof meta.description !== "string") return fail(id, "description 必须是字符串")
+  if (meta.preview != null && meta.preview !== "preview.png") return fail(id, "preview 只能是 preview.png")
+  if (meta.author != null && (typeof meta.author !== "string" || [...meta.author].length > 40)) {
+    return fail(id, "author 超过 40 个字符")
+  }
   if (!html.trim()) return fail(id, "scene.html 是空的")
   if (Buffer.byteLength(html) > maxHTML) return fail(id, "scene.html 超过 1 MiB")
   const hash = createHash("sha256").update(html).digest("hex")
@@ -129,17 +133,21 @@ const files = process.argv.slice(2)
 const scenes = new Map()
 for (const file of files) {
   const name = basename(file)
-  if (name !== "scene.json" && name !== "scene.html") {
-    fail(file, "只接受 <id>/scene.json 和 <id>/scene.html")
+  if (name !== "scene.json" && name !== "scene.html" && name !== "preview.png") {
+    fail(file, "只接受 <id>/scene.json、<id>/scene.html 和 <id>/preview.png")
     continue
   }
   const id = basename(dirname(file))
-  const scene = scenes.get(id) ?? { json: "", html: "" }
-  scene[name === "scene.json" ? "json" : "html"] = file
+  const scene = scenes.get(id) ?? { json: "", html: "", preview: "" }
+  scene[name === "scene.json" ? "json" : name === "scene.html" ? "html" : "preview"] = file
   scenes.set(id, scene)
 }
 
 for (const [id, scene] of scenes) {
+  // A pull request may touch only one of the pair. Read the other from the
+  // checkout, which already has the base branch.
+  if (!scene.json) scene.json = `${id}/scene.json`
+  if (!scene.html) scene.html = `${id}/scene.html`
   if (!scene.json || !scene.html) {
     fail(id, "scene.json 和 scene.html 必须成对出现")
     continue
@@ -154,6 +162,7 @@ for (const [id, scene] of scenes) {
     continue
   }
   check(id, metaRaw, html)
+  if (metaRaw.includes('"preview"') && !scene.preview) fail(id, "scene.json 写了 preview，但没有 preview.png")
 }
 
 if (failures.length) {
