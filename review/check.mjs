@@ -14,6 +14,7 @@ import { basename, dirname } from "node:path"
 
 const idRe = /^[a-z0-9](?:[a-z0-9-]{0,38}[a-z0-9])?$/
 const hashRe = /^[0-9a-f]{64}$/
+const versionRe = /^(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)$/
 const maxName = 40
 const maxHTML = 1 << 20
 
@@ -109,8 +110,8 @@ function check(id, metaRaw, html) {
   if (meta.id !== id) return fail(id, "scene.json 的 id 和目录名不一致")
   const name = typeof meta.name === "string" ? meta.name.trim() : ""
   if (!name || [...name].length > maxName) return fail(id, "name 为空或超过 40 个字符")
-  if (typeof meta.version !== "string" || !meta.version || meta.version.length > 32) {
-    return fail(id, "version 为空或超过 32 个字符")
+  if (typeof meta.version !== "string" || !versionRe.test(meta.version)) {
+    return fail(id, "version 必须是三段数字，如 1.0.0")
   }
   if (typeof meta.description !== "string") return fail(id, "description 必须是字符串")
   if (meta.preview != null && meta.preview !== "preview.png") return fail(id, "preview 只能是 preview.png")
