@@ -9,7 +9,7 @@
 // line. With no files, nothing is checked and the run passes.
 
 import { createHash } from "node:crypto"
-import { readFileSync } from "node:fs"
+import { existsSync, readFileSync } from "node:fs"
 import { basename, dirname } from "node:path"
 
 const idRe = /^[a-z0-9](?:[a-z0-9-]{0,38}[a-z0-9])?$/
@@ -114,6 +114,10 @@ function check(id, metaRaw, html) {
   }
   if (typeof meta.description !== "string") return fail(id, "description 必须是字符串")
   if (meta.preview != null && meta.preview !== "preview.png") return fail(id, "preview 只能是 preview.png")
+  // preview.png may already be on the base branch, so it is not always in the diff.
+  if (meta.preview === "preview.png" && !existsSync(`${id}/preview.png`)) {
+    return fail(id, "scene.json 写了 preview，但没有 preview.png")
+  }
   if (meta.author != null && (typeof meta.author !== "string" || [...meta.author].length > 40)) {
     return fail(id, "author 超过 40 个字符")
   }
@@ -138,8 +142,10 @@ for (const file of files) {
     continue
   }
   const id = basename(dirname(file))
-  const scene = scenes.get(id) ?? { json: "", html: "", preview: "" }
-  scene[name === "scene.json" ? "json" : name === "scene.html" ? "html" : "preview"] = file
+  const scene = scenes.get(id) ?? { json: "", html: "" }
+  if (name === "scene.json" || name === "scene.html") {
+    scene[name === "scene.json" ? "json" : "html"] = file
+  }
   scenes.set(id, scene)
 }
 
@@ -162,7 +168,6 @@ for (const [id, scene] of scenes) {
     continue
   }
   check(id, metaRaw, html)
-  if (metaRaw.includes('"preview"') && !scene.preview) fail(id, "scene.json 写了 preview，但没有 preview.png")
 }
 
 if (failures.length) {
