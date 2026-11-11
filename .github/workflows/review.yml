@@ -1,0 +1,27 @@
+name: review
+
+on:
+  pull_request:
+    branches: [main]
+
+# Read-only. A review must not be able to publish or rewrite anything.
+permissions:
+  contents: read
+
+jobs:
+  scenes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: changed scenes
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin "${{ github.base_ref }}"
+          files=$(git diff --name-only --diff-filter=ACMRT "origin/${{ github.base_ref }}" -- '*.json' '*.html')
+          if [ -z "$files" ]; then
+            echo "没有改动的场景"
+            exit 0
+          fi
+          echo "$files"
+          # shellcheck disable=SC2086
+          node review/check.mjs $files
