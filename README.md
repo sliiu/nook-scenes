@@ -1,6 +1,23 @@
+<div align="center">
+
+<a href="https://sliiu.github.io/nook/"><img src="https://raw.githubusercontent.com/sliiu/nook/main/.github/logo-256.png" width="112" alt="Nook"></a>
+
+<br>
+
 # nook-scenes
 
-The Nook scene catalog. It holds scenes, not the app. A scene is published only when its pull request merges into `main`. [中文](README.zh.md)
+### The Nook scene catalog.
+
+**A scene is published only when its pull request merges into `main`.**<br>
+This repository holds scenes, not the app.
+
+[![License](https://img.shields.io/badge/license-MIT-111111)](https://github.com/sliiu/nook/blob/main/LICENSE)
+
+**[Nook](https://sliiu.github.io/nook/)** &nbsp;·&nbsp; **[The app](https://github.com/sliiu/nook)** &nbsp;·&nbsp; **English** · [简体中文](README.zh.md)
+
+</div>
+
+<br>
 
 The app installs from this repository only, through `nook://scene/<id>`. It fetches the files at the merged commit and checks `htmlSha256`.
 
