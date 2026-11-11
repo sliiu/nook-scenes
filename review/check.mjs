@@ -37,24 +37,49 @@ function bounded(s, start, end) {
 }
 
 function hasCall(s, name) {
+  return hasFollower(s, name, ["("])
+}
+
+function hasFollower(s, name, followers) {
   for (let from = 0; ; ) {
     const at = s.indexOf(name, from)
     if (at < 0) return false
     if (bounded(s, at, at + name.length)) {
       const rest = s.slice(at + name.length).trimStart()
-      if (rest.startsWith("(")) return true
+      if (followers.some((follower) => rest.startsWith(follower))) return true
     }
     from = at + name.length
   }
 }
 
-function identUsed(s, name) {
+function hasProp(s, obj, name) {
   for (let from = 0; ; ) {
-    const at = s.indexOf(name, from)
+    const at = s.indexOf(obj, from)
     if (at < 0) return false
-    if (bounded(s, at, at + name.length)) return true
-    from = at + name.length
+    if (bounded(s, at, at + obj.length)) {
+      let rest = s.slice(at + obj.length).trimStart()
+      if (rest.startsWith(".")) {
+        rest = rest.slice(1).trimStart()
+        if (rest.startsWith(name) && bounded(rest, 0, name.length)) return true
+      }
+      if (rest.startsWith("[")) {
+        rest = rest.slice(1).trimStart()
+        if (rest.startsWith(`"${name}"`) || rest.startsWith(`'${name}'`)) return true
+      }
+    }
+    from = at + obj.length
   }
+}
+
+// frameWalk reports name used as a window: name.prop, name[...], or
+// window.name, self.name, globalThis.name. A CSS property, a local binding
+// and rect.top are not walks.
+function frameWalk(s, name) {
+  if (hasFollower(s, name, [".", "["])) return true
+  for (const obj of ["window", "self", "globalThis"]) {
+    if (hasProp(s, obj, name)) return true
+  }
+  return false
 }
 
 function unsafeScript(html) {
@@ -64,8 +89,8 @@ function unsafeScript(html) {
   for (const name of callNames) {
     if (html.includes(name) && hasCall(html, name)) return name
   }
-  if (identUsed(html, "parent")) return "parent"
-  if (identUsed(html, "top")) return "top"
+  if (frameWalk(html, "parent")) return "parent"
+  if (frameWalk(html, "top")) return "top"
   return ""
 }
 
