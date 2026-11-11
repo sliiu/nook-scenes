@@ -144,6 +144,10 @@ for (const file of files) {
 }
 
 for (const [id, scene] of scenes) {
+  // A pull request may touch only one of the pair. Read the other from the
+  // checkout, which already has the base branch.
+  if (!scene.json) scene.json = `${id}/scene.json`
+  if (!scene.html) scene.html = `${id}/scene.html`
   if (!scene.json || !scene.html) {
     fail(id, "scene.json 和 scene.html 必须成对出现")
     continue
