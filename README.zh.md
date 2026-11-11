@@ -1,6 +1,23 @@
+<div align="center">
+
+<a href="https://sliiu.github.io/nook/"><img src="https://raw.githubusercontent.com/sliiu/nook/main/.github/logo-256.png" width="112" alt="Nook"></a>
+
+<br>
+
 # nook-scenes
 
-Nook 的场景清单。这里只放场景，不放应用代码。一个场景被合并进 `main`，才算上架。[English](README.md)
+### Nook 的场景清单。
+
+**一个场景被合并进 `main`，才算上架。**<br>
+这里只放场景，不放应用代码。
+
+[![License](https://img.shields.io/badge/license-MIT-111111)](https://github.com/sliiu/nook/blob/main/LICENSE)
+
+**[Nook](https://sliiu.github.io/nook/)** &nbsp;·&nbsp; **[应用](https://github.com/sliiu/nook)** &nbsp;·&nbsp; **简体中文** · [English](README.md)
+
+</div>
+
+<br>
 
 应用只从本仓库安装，地址写在 `nook://scene/<id>`。安装时按合并后的 commit 取文件，并核对 `scene.json` 里的 `htmlSha256`。
 
