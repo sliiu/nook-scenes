@@ -261,34 +261,16 @@
         grid.appendChild(box);
       }
 
-      // Replaced at deploy with the scene ids found in the checkout, so the
-      // page never asks api.github.com for the tree. That endpoint answers 403
-      // once a visitor's IP has spent its 60 unauthenticated requests an hour.
-      const LISTING = /* LISTING */ null /* /LISTING */;
-
+      // One file, written on main after a scene merges. raw.githubusercontent.com
+      // has no hourly cap, unlike api.github.com.
       async function load() {
-        const ids = LISTING;
-        if (!ids) return empty("清单读不到，稍后再试");
-        const scenes = [];
-        await Promise.all(
-          ids.map(async (id) => {
-            const res = await fetch(
-              "https://raw.githubusercontent.com/" + REPO + "/main/" + id + "/scene.json",
-            );
-            if (!res.ok) return;
-            const meta = await res.json();
-            if (!meta || meta.id !== id) return;
-            scenes.push({
-              id: meta.id,
-              name: meta.name,
-              version: meta.version,
-              description: meta.description,
-              author: meta.author,
-              preview: meta.preview === "preview.png" ? id + "/preview.png" : "",
-            });
-          }),
+        const res = await fetch(
+          "https://raw.githubusercontent.com/" + REPO + "/main/scenes.json",
         );
-        scenes.sort((a, b) => a.id.localeCompare(b.id));
+        if (!res.ok) return empty("清单读不到，稍后再试");
+        const body = await res.json();
+        const scenes = Array.isArray(body.scenes) ? body.scenes : [];
+        scenes.sort((a, b) => String(a.id).localeCompare(String(b.id)));
         if (!scenes.length) return empty("还没有上架的场景");
         grid.replaceChildren(...scenes.map(card));
       }
