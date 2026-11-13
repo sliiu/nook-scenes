@@ -5,12 +5,12 @@
 //
 //   node review/check.mjs <file> [<file>...]
 //
-// A file is <id>/scene.json or <id>/scene.html. Exit 1 prints one reason per
-// line. With no files, nothing is checked and the run passes.
+// A file is scenes/<id>/scene.json or scenes/<id>/scene.html. Exit 1 prints
+// one reason per line. With no files, nothing is checked and the run passes.
 
 import { createHash } from "node:crypto"
 import { existsSync, readFileSync } from "node:fs"
-import { basename, dirname } from "node:path"
+import { basename, relative, sep } from "node:path"
 
 const idRe = /^[a-z0-9](?:[a-z0-9-]{0,38}[a-z0-9])?$/
 const hashRe = /^[0-9a-f]{64}$/
@@ -116,7 +116,7 @@ function check(id, metaRaw, html) {
   if (typeof meta.description !== "string") return fail(id, "description 必须是字符串")
   if (meta.preview != null && meta.preview !== "preview.png") return fail(id, "preview 只能是 preview.png")
   // preview.png may already be on the base branch, so it is not always in the diff.
-  if (meta.preview === "preview.png" && !existsSync(`${id}/preview.png`)) {
+  if (meta.preview === "preview.png" && !existsSync(`scenes/${id}/preview.png`)) {
     return fail(id, "scene.json 写了 preview，但没有 preview.png")
   }
   if (meta.author != null && (typeof meta.author !== "string" || [...meta.author].length > 40)) {
@@ -134,15 +134,22 @@ function check(id, metaRaw, html) {
   if (bad) return fail(id, `页面不能用 ${bad}`)
 }
 
+function sceneId(file) {
+  const parts = relative(".", file).split(sep)
+  if (parts.length !== 3 || parts[0] !== "scenes") return ""
+  if (!["scene.json", "scene.html", "preview.png"].includes(parts[2])) return ""
+  return parts[1]
+}
+
 const files = process.argv.slice(2)
 const scenes = new Map()
 for (const file of files) {
   const name = basename(file)
-  if (name !== "scene.json" && name !== "scene.html" && name !== "preview.png") {
-    fail(file, "只接受 <id>/scene.json、<id>/scene.html 和 <id>/preview.png")
+  const id = sceneId(file)
+  if (!id) {
+    fail(file, "只接受 scenes/<id>/scene.json、scene.html 和 preview.png")
     continue
   }
-  const id = basename(dirname(file))
   const scene = scenes.get(id) ?? { json: "", html: "" }
   if (name === "scene.json" || name === "scene.html") {
     scene[name === "scene.json" ? "json" : "html"] = file
@@ -153,8 +160,8 @@ for (const file of files) {
 for (const [id, scene] of scenes) {
   // A pull request may touch only one of the pair. Read the other from the
   // checkout, which already has the base branch.
-  if (!scene.json) scene.json = `${id}/scene.json`
-  if (!scene.html) scene.html = `${id}/scene.html`
+  if (!scene.json) scene.json = `scenes/${id}/scene.json`
+  if (!scene.html) scene.html = `scenes/${id}/scene.html`
   if (!scene.json || !scene.html) {
     fail(id, "scene.json 和 scene.html 必须成对出现")
     continue

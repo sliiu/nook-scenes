@@ -26,7 +26,7 @@
 一个场景是一个目录，目录名就是 id。id 用小写字母、数字和连字符，2 到 40 个字符，不能以连字符开头或结尾。
 
 ```text
-night/
+scenes/night/
   scene.json
   scene.html
 ```
@@ -48,7 +48,7 @@ night/
 `id` 必须和目录名相同。`name` 是显示名，最多 40 个字符。`version` 用三段数字，如 `1.0.0`，每次改页面都要往上加。`preview` 和 `author` 可以不写；写了 `preview` 就只能是同目录的 `preview.png`。`htmlSha256` 这样算：
 
 ```bash
-shasum -a 256 night/scene.html
+shasum -a 256 scenes/night/scene.html
 ```
 
 页面是一个不依赖外链的 HTML 文件，最大 1 MiB。

@@ -26,7 +26,7 @@ The app installs from this repository only, through `nook://scene/<id>`. It fetc
 One scene is one directory, and the directory name is the id: lowercase letters, digits and hyphens, 2 to 40 characters, not starting or ending with a hyphen.
 
 ```text
-night/
+scenes/night/
   scene.json
   scene.html
 ```
@@ -48,7 +48,7 @@ night/
 `id` matches the directory name. `name` is the display name, at most 40 characters. `version` is three numbers, such as `1.0.0`, and goes up whenever the page changes. `preview` and `author` are optional; `preview`, when present, is the file `preview.png` next to the page. Compute `htmlSha256` like this:
 
 ```bash
-shasum -a 256 night/scene.html
+shasum -a 256 scenes/night/scene.html
 ```
 
 The page is one self-contained HTML file of at most 1 MiB.

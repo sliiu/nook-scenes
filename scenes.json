@@ -1,0 +1,19 @@
+{
+  "scenes": [
+    {
+      "id": "candy",
+      "name": "糖屋",
+      "version": "1.0.0",
+      "description": "一间糖屋：拖动房间调音量和亮度，糖纸扭转是开关。",
+      "author": "Nook"
+    },
+    {
+      "id": "home",
+      "name": "Home",
+      "version": "1.0.0",
+      "description": "出厂二维点控：X 是音量，Y 是亮度。",
+      "author": "Nook",
+      "preview": "scenes/home/preview.png"
+    }
+  ]
+}

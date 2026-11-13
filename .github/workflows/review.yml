@@ -17,7 +17,7 @@ jobs:
         run: |
           set -euo pipefail
           git fetch --no-tags origin "${{ github.base_ref }}"
-          files=$(git diff --name-only --diff-filter=ACMRT "origin/${{ github.base_ref }}" -- '*/scene.json' '*/scene.html' '*/preview.png')
+          files=$(git diff --name-only --diff-filter=ACMRT "origin/${{ github.base_ref }}" -- 'scenes/*/scene.json' 'scenes/*/scene.html' 'scenes/*/preview.png')
           if [ -z "$files" ]; then
             echo "没有改动的场景"
             exit 0
