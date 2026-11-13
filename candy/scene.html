@@ -1,0 +1,923 @@
+<!-- Candy House. One room, imported beside Home, not a published scene.
+     Drag the room: X is output volume, Y is brightness. Brightness locks
+     when the machine has no built-in display, and the window stays frosted.
+     Three latched switches share one wrapper twist. Drag it, and releasing
+     past halfway settles on that end; a click with no drag flips it. A new
+     press takes over mid-twist. Wi-Fi, output mute and mic mute are the only
+     ones that stay. Play, pause and skip squash and spring back: media keys
+     have no on/off to keep. -->
+<div class="candy" data-scene="candy" data-look="light" data-band="2" tabindex="0" role="application" aria-label="糖屋">
+  <div class="wall"></div>
+  <div class="wash"></div>
+  <div class="floor"></div>
+
+  <div class="window">
+    <div class="pane"></div>
+    <div class="frost"></div>
+    <div class="sill"></div>
+    <div class="swatches">
+      <button class="swatch" type="button" data-look="light" aria-label="浅色"></button>
+      <button class="swatch" type="button" data-look="dark" aria-label="深色"></button>
+      <button class="swatch" type="button" data-look="auto" aria-label="自动"></button>
+    </div>
+  </div>
+
+  <div class="lights" role="switch" tabindex="0" aria-label="Wi-Fi" aria-checked="true">
+    <i class="bulb"></i><i class="bulb"></i><i class="bulb"></i><i class="bulb"></i><i class="bulb"></i><i class="bulb"></i>
+    <span class="bow"></span>
+  </div>
+
+  <div class="jar" aria-hidden="true"><div class="lid"></div><div class="glass"><i></i><i></i><i></i></div></div>
+
+  <div class="radio" role="switch" tabindex="0" aria-label="输出静音" aria-checked="true">
+    <div class="disc"></div>
+    <div class="paper"></div>
+  </div>
+
+  <div class="person" aria-hidden="true">
+    <div class="head"></div>
+    <div class="torso"></div>
+  </div>
+  <div class="cushion" aria-hidden="true"></div>
+
+  <div class="lamp" role="slider" tabindex="0" aria-label="键盘灯" aria-valuemin="0" aria-valuemax="100">
+    <div class="shade"></div>
+    <div class="cord"></div>
+  </div>
+
+  <div class="mic">
+    <div class="cap" role="switch" tabindex="0" aria-label="麦克风静音" aria-checked="true"></div>
+    <div class="head"></div>
+    <div class="stem" role="slider" tabindex="0" aria-label="麦克风" aria-valuemin="0" aria-valuemax="100"></div>
+  </div>
+
+  <div class="speaker" aria-hidden="true"><div class="cone"></div></div>
+  <button class="tag" type="button" aria-label="输出设备">输出</button>
+
+  <div class="shelf">
+    <button class="drop" type="button" data-act="media.previous" aria-label="上一首"></button>
+    <button class="drop" type="button" data-act="media.toggle" aria-label="播放或暂停"></button>
+    <button class="drop" type="button" data-act="media.next" aria-label="下一首"></button>
+  </div>
+
+  <div class="readout" aria-hidden="true"></div>
+</div>
+<style>
+  .candy {
+    --wall: #ffd4e0;
+    --floor: #f29ab6;
+    --ink: #4a2030;
+    --paper: #fffaf6;
+    --floor-ink: #4a2030;
+    --vol: 0.36;
+    --bri: 0.62;
+    --key: 0.4;
+    --mic: 0.45;
+    position: relative;
+    width: 360px;
+    height: 420px;
+    overflow: hidden;
+    border-radius: 28px;
+    background: var(--wall);
+    color: var(--ink);
+    font-family: "Hiragino Sans", "PingFang SC", system-ui, sans-serif;
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: grab;
+    touch-action: none;
+  }
+  .candy * { box-sizing: border-box; }
+  .candy button { font: inherit; color: inherit; background: none; border: 0; padding: 0; }
+  .candy.dragging { cursor: grabbing; }
+  .candy:focus { outline: none; }
+  .candy:focus-visible { box-shadow: inset 0 0 0 2px #ffd36b; }
+  .candy[data-look="dark"] {
+    --wall: #3a2430;
+    --floor: #2a1822;
+    --ink: #f6c1cf;
+    --paper: #5c3344;
+    --floor-ink: #f6c1cf;
+  }
+  .candy[data-look="auto"] {
+    --floor: #3a2430;
+    --floor-ink: #f6c1cf;
+  }
+  .candy .dead { filter: grayscale(0.85); opacity: 0.55; cursor: default; }
+
+  .candy .wall { position: absolute; inset: 0 0 118px 0; pointer-events: none; }
+  .candy .wash {
+    position: absolute;
+    inset: 0 0 118px 0;
+    background: #1b1424;
+    opacity: calc((1 - var(--bri)) * 0.28);
+    pointer-events: none;
+  }
+  .candy .floor {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 118px;
+    background: var(--floor);
+    box-shadow: inset 0 12px 0 rgba(255, 255, 255, 0.28);
+    pointer-events: none;
+  }
+
+  .candy .window { position: absolute; left: 20px; top: 26px; width: 116px; height: 92px; pointer-events: none; }
+  .candy .pane {
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    background:
+      linear-gradient(#fff, #fff) center / 4px 100% no-repeat,
+      linear-gradient(#fff, #fff) center / 100% 4px no-repeat,
+      linear-gradient(
+        hsl(calc(222 - var(--bri) * 188), calc(42% + var(--bri) * 38%), calc(18% + var(--bri) * 58%)),
+        hsl(calc(16 + var(--bri) * 28), 86%, calc(32% + var(--bri) * 36%))
+      );
+    box-shadow: 0 0 0 7px #fff, 0 7px 0 #e7a0b6;
+  }
+  .candy .frost {
+    position: absolute;
+    inset: 7px;
+    border-radius: 10px;
+    background: repeating-linear-gradient(135deg, transparent 0 6px, rgba(255, 255, 255, 0.72) 6px 8px);
+    opacity: calc((1 - var(--bri)) * 0.85);
+  }
+  .candy .window.locked .frost { opacity: 1; }
+  .candy .sill {
+    position: absolute;
+    left: -6px; right: -6px; bottom: -8px;
+    height: 10px;
+    border-radius: 6px;
+    background: #fff;
+  }
+  .candy .swatches {
+    position: absolute;
+    left: 16px; bottom: 16px;
+    display: flex;
+    gap: 6px;
+    pointer-events: auto;
+  }
+  .candy .swatch {
+    position: relative;
+    width: 20px; height: 20px;
+    border-radius: 7px;
+    cursor: pointer;
+  }
+  .candy .swatch[data-look="light"] { background: #fff4e4; box-shadow: inset 0 0 0 1px #e7b8c6; }
+  .candy .swatch[data-look="dark"] { background: #3a2430; }
+  .candy .swatch[data-look="auto"] { background: linear-gradient(115deg, #fff4e4 50%, #3a2430 50%); }
+  .candy .swatch.on { transform: rotate(-14deg); }
+  .candy .swatch.on::after {
+    content: "";
+    position: absolute;
+    right: 1px; bottom: 1px;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 0 1px rgba(74, 32, 48, 0.4);
+  }
+
+  .candy .lights {
+    --twist: 0;
+    position: absolute;
+    left: 148px; top: 16px;
+    width: 196px; height: 40px;
+    cursor: ew-resize;
+  }
+  .candy .lights::before {
+    content: "";
+    position: absolute;
+    left: 0; right: 28px; top: 16px;
+    height: 2px;
+    background: #fff;
+  }
+  .candy .bulb {
+    position: absolute;
+    top: 12px;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--paper);
+    opacity: calc(0.4 + (1 - var(--twist)) * 0.6);
+    box-shadow: 0 0 calc((1 - var(--twist)) * 9px) var(--glow, #ffd36b);
+  }
+  .candy .bulb:nth-child(1) { left: 8px; --glow: #ff8fab; }
+  .candy .bulb:nth-child(2) { left: 34px; --glow: #ffd36b; }
+  .candy .bulb:nth-child(3) { left: 60px; --glow: #9be7c4; }
+  .candy .bulb:nth-child(4) { left: 86px; --glow: #7ec8ff; }
+  .candy .bulb:nth-child(5) { left: 112px; --glow: #c9a6ff; }
+  .candy .bulb:nth-child(6) { left: 138px; --glow: #ff8fab; }
+  .candy .bow {
+    position: absolute;
+    right: 0; top: 8px;
+    width: 26px; height: 16px;
+    border-radius: 5px;
+    background: #fff;
+    transform: rotate(calc(var(--twist) * 180deg));
+  }
+  .candy .bow::before, .candy .bow::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    width: 9px; height: 12px;
+    background: #fff;
+    border-radius: 40%;
+  }
+  .candy .bow::before { left: -6px; transform: rotate(-28deg); }
+  .candy .bow::after { right: -6px; transform: rotate(28deg); }
+
+  .candy .jar {
+    position: absolute;
+    right: 18px; top: 62px;
+    width: 58px; height: 78px;
+    transition: transform 240ms ease;
+    pointer-events: none;
+  }
+  .candy[data-band="5"] .jar { transform: rotate(18deg) translate(4px, 8px); }
+  .candy .lid {
+    position: absolute;
+    left: 8px; right: 8px; top: 0;
+    height: 16px;
+    border-radius: 7px;
+    background: #ffd36b;
+  }
+  .candy .glass {
+    position: absolute;
+    inset: 14px 0 0 0;
+    border-radius: 12px 12px 18px 18px;
+    background: rgba(255, 255, 255, 0.45);
+    box-shadow: inset 0 0 0 3px #fff;
+  }
+  .candy .glass i {
+    position: absolute;
+    bottom: 10px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+  .candy .glass i:nth-child(1) { left: 10px; background: #ff8fab; }
+  .candy .glass i:nth-child(2) { left: 24px; bottom: 16px; background: #7ec8ff; }
+  .candy .glass i:nth-child(3) { left: 34px; background: #9be7c4; }
+
+  .candy .radio {
+    --twist: 0;
+    position: absolute;
+    left: 16px; top: 148px;
+    width: 86px; height: 70px;
+    cursor: ew-resize;
+  }
+  .candy .disc {
+    width: 54px; height: 54px;
+    margin: 8px auto;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 50% 50%, #fffaf6 0 5px, #4a2030 6px 8px, transparent 9px),
+      repeating-conic-gradient(from 0deg, #ff8fab 0 18deg, #ffd6e2 18deg 36deg);
+    animation: spin calc(1.7s - var(--vol) * 1s) linear infinite;
+    animation-play-state: paused;
+  }
+  .candy[data-band="2"] .disc,
+  .candy[data-band="3"] .disc,
+  .candy[data-band="4"] .disc,
+  .candy[data-band="5"] .disc { animation-play-state: running; }
+  .candy.muted-out .disc { animation-play-state: paused; }
+  .candy .paper {
+    position: absolute;
+    left: 10px; right: 10px; top: 12px; bottom: 12px;
+    border-radius: 14px;
+    background: linear-gradient(#fff, #ffe4ee);
+    transform: rotate(calc(var(--twist) * 180deg)) scale(calc(0.15 + var(--twist) * 0.85));
+    opacity: var(--twist);
+  }
+  .candy .paper::before, .candy .paper::after {
+    content: "";
+    position: absolute;
+    top: 12px;
+    width: 12px; height: 16px;
+    background: #fff;
+    border-radius: 40%;
+  }
+  .candy .paper::before { left: -8px; transform: rotate(-32deg); }
+  .candy .paper::after { right: -8px; transform: rotate(32deg); }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .candy .person {
+    position: absolute;
+    left: 118px; top: 168px;
+    width: 58px; height: 78px;
+    transform-origin: 50% 100%;
+    pointer-events: none;
+  }
+  .candy .person .head {
+    position: relative;
+    width: 32px; height: 32px;
+    margin: 0 auto;
+    border-radius: 50%;
+    background: #ff8fab;
+  }
+  .candy .person .head::before, .candy .person .head::after {
+    content: "";
+    position: absolute;
+    top: 12px;
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: #4a2030;
+  }
+  .candy .person .head::before { left: 8px; }
+  .candy .person .head::after { right: 8px; }
+  .candy[data-band="0"] .person .head::before,
+  .candy[data-band="0"] .person .head::after { height: 2px; top: 14px; border-radius: 1px; }
+  .candy .torso {
+    width: 40px; height: 40px;
+    margin: -6px auto 0;
+    border-radius: 18px 18px 14px 14px;
+    background: #c9a6ff;
+  }
+  .candy[data-band="1"] .person { animation: sway 1.6s ease-in-out infinite; }
+  .candy[data-band="2"] .person { animation: sway 0.8s ease-in-out infinite; }
+  .candy[data-band="3"] .person { animation: bounce 0.46s ease-in-out infinite; }
+  .candy[data-band="4"] .person { animation: jump 0.34s ease-in-out infinite; }
+  .candy[data-band="5"] .person { animation: jump 0.22s linear infinite; }
+  @keyframes sway { 50% { transform: rotate(-7deg); } }
+  @keyframes bounce { 50% { transform: translateY(-16px); } }
+  @keyframes jump { 50% { transform: translateY(-30px) rotate(8deg); } }
+  .candy .cushion {
+    position: absolute;
+    left: 110px; top: 232px;
+    width: 74px; height: 16px;
+    border-radius: 40%;
+    background: #ffd36b;
+    pointer-events: none;
+  }
+
+  .candy .lamp {
+    position: absolute;
+    left: 250px; top: 132px;
+    width: 48px; height: 150px;
+    cursor: ns-resize;
+  }
+  .candy .shade {
+    height: 34px;
+    border-radius: 8px 8px 16px 16px;
+    background: #ffd36b;
+    filter: brightness(calc(0.55 + var(--key) * 0.9));
+  }
+  .candy .cord {
+    width: 4px;
+    height: calc(22px + var(--key) * 78px);
+    margin: 0 auto;
+    border-radius: 2px;
+    background: var(--ink);
+  }
+
+  .candy .mic { position: absolute; left: 196px; top: 248px; width: 40px; height: 108px; }
+  .candy .cap {
+    --twist: 0;
+    position: absolute;
+    left: -4px; right: -4px; top: 0;
+    height: 34px;
+    border-radius: 12px;
+    background: #fff;
+    transform: rotate(calc(var(--twist) * 180deg));
+    opacity: calc(0.15 + var(--twist) * 0.85);
+    cursor: ew-resize;
+    z-index: 1;
+  }
+  .candy .mic .head {
+    height: calc(16px + var(--mic) * 26px);
+    border-radius: 12px;
+    background: #7ec8ff;
+    pointer-events: none;
+  }
+  .candy .stem {
+    width: 40px;
+    height: 56px;
+    cursor: ns-resize;
+  }
+  .candy .stem::before {
+    content: "";
+    display: block;
+    width: 4px; height: 100%;
+    margin: 0 auto;
+    border-radius: 2px;
+    background: #fff;
+  }
+
+  .candy .speaker {
+    position: absolute;
+    right: 18px; top: 286px;
+    width: 62px; height: 62px;
+    pointer-events: none;
+  }
+  .candy .cone {
+    width: 54px; height: 54px;
+    margin: 0 auto;
+    border-radius: 50%;
+    background: radial-gradient(circle, #ff8fab 0 28%, var(--ink) 29% 44%, #fff 45%);
+    transform: scale(calc(1 + var(--vol) * 0.14));
+  }
+  .candy .tag {
+    position: absolute;
+    right: 14px; top: 350px;
+    width: 74px;
+    font-size: 10px;
+    line-height: 1.3;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    background: var(--paper);
+    color: var(--ink);
+    border-radius: 6px;
+    padding: 3px 4px;
+    cursor: pointer;
+  }
+
+  .candy .shelf { position: absolute; left: 18px; top: 344px; display: flex; gap: 10px; }
+  .candy .drop {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 4px 0 #e090a8;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    transition: transform 140ms cubic-bezier(0.2, 1.4, 0.4, 1);
+  }
+  .candy .drop:nth-child(1) { background: #9be7c4; }
+  .candy .drop:nth-child(2) { background: #ff8fab; width: 34px; height: 34px; }
+  .candy .drop:nth-child(3) { background: #ffd36b; }
+  .candy .drop.down { transform: scale(0.8, 0.66) translateY(4px); transition-duration: 50ms; }
+  .candy .drop::before { content: ""; display: block; }
+  .candy .drop[data-act="media.previous"]::before {
+    border-right: 7px solid var(--ink);
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+  }
+  .candy .drop[data-act="media.next"]::before {
+    border-left: 7px solid var(--ink);
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+  }
+  .candy .drop[data-act="media.toggle"]::before {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #fff;
+  }
+
+  .candy .readout {
+    position: absolute;
+    left: 16px; right: 16px; bottom: 8px;
+    text-align: center;
+    font-size: 10px;
+    letter-spacing: 0.04em;
+    color: var(--floor-ink);
+    pointer-events: none;
+    opacity: 0.8;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .candy .person, .candy .disc, .candy .jar, .candy .drop { animation: none; transition: none; }
+  }
+</style>
+<script>
+(() => {
+  "use strict";
+  const root = document.querySelector('.candy[data-scene="candy"]');
+  if (!root) return;
+  const $ = (sel) => root.querySelector(sel);
+  const ctl = () => window.Control;
+  const rows = {};
+  let volume = 36;
+  let bright = 62;
+  let brightOK = false;
+  let drag = null;
+  let roomTimer = 0;
+  let disposed = false;
+  let calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  const clamp = (n) => Math.min(100, Math.max(0, Math.round(Number(n) || 0)));
+  const bandOf = (v) => (v <= 0 ? 0 : v < 25 ? 1 : v < 50 ? 2 : v < 75 ? 3 : v < 98 ? 4 : 5);
+
+  function paint() {
+    const out = rows["output.level"];
+    const muted = !!(out && out.muted);
+    const heard = muted && drag !== "room" ? 0 : volume;
+    root.style.setProperty("--vol", (heard / 100).toFixed(3));
+    root.style.setProperty("--bri", (brightOK ? bright / 100 : 0.35).toFixed(3));
+    root.dataset.band = String(bandOf(heard));
+    root.classList.toggle("muted-out", muted);
+    $(".window").classList.toggle("locked", !brightOK);
+    const text = "音量 " + (muted ? "静音" : volume) + " · 亮度 " + (brightOK ? bright : "不可用");
+    $(".readout").textContent = text;
+    root.setAttribute("aria-label", "糖屋，" + text);
+  }
+
+  function paintLevels() {
+    const mic = rows["input.level"];
+    const key = rows["keyboard.level"];
+    if (mic) {
+      root.style.setProperty("--mic", ((mic.percent || 0) / 100).toFixed(3));
+      $(".stem").setAttribute("aria-valuenow", String(mic.percent || 0));
+    }
+    if (key && key.available) {
+      root.style.setProperty("--key", ((key.percent || 0) / 100).toFixed(3));
+      $(".lamp").setAttribute("aria-valuenow", String(key.percent || 0));
+    }
+    const dev = rows["output.device"];
+    const picked = dev && (dev.options || []).find((o) => o.id === dev.selected);
+    const tag = $(".tag");
+    tag.textContent = picked ? picked.label : dev && dev.available ? "输出" : "不可用";
+    tag.setAttribute("aria-label", picked ? "输出设备，" + picked.label : "输出设备");
+    const look = rows.appearance;
+    if (look && look.selected) {
+      root.dataset.look = look.selected;
+      root.querySelectorAll(".swatch").forEach((el) => {
+        const listed = !look.options || !look.options.length || look.options.some((o) => o.id === el.dataset.look);
+        el.classList.toggle("on", el.dataset.look === look.selected);
+        el.classList.toggle("dead", !look.available || !listed);
+      });
+    }
+    const dead = (id, el, extra) => {
+      const row = rows[id];
+      el.classList.toggle("dead", !row || !row.available || !!extra);
+      el.setAttribute("aria-disabled", el.classList.contains("dead") ? "true" : "false");
+    };
+    dead("wifi.power", $(".lights"));
+    const out = rows["output.level"];
+    dead("output.level", $(".radio"), out && out.adjustable === false);
+    dead("input.level", $(".mic"), mic && mic.adjustable === false);
+    dead("keyboard.level", $(".lamp"));
+    dead("output.device", tag, dev && !(dev.options || []).length);
+    root.querySelectorAll(".drop").forEach((el) => dead(el.dataset.act, el));
+    if (rows["display.level"] && rows["display.level"].available === false) brightOK = false;
+  }
+
+  let refreshGen = 0;
+  function refresh() {
+    const c = ctl();
+    const gen = ++refreshGen;
+    if (!c) return Promise.resolve();
+    return c.listControls().then((list) => {
+      if (disposed || gen !== refreshGen) return;
+      (list || []).forEach((row) => {
+        if (row && row.id) rows[row.id] = row;
+      });
+      const out = rows["output.level"];
+      if (out && !out.muted && drag !== "room") volume = clamp(out.percent);
+      paintLevels();
+      wifiTwist.sync();
+      muteTwist.sync();
+      capTwist.sync();
+      paint();
+    });
+  }
+
+  function queueRoom() {
+    clearTimeout(roomTimer);
+    roomTimer = setTimeout(flushRoom, 33);
+  }
+  function flushRoom() {
+    clearTimeout(roomTimer);
+    roomTimer = 0;
+    const c = ctl();
+    if (!c) return Promise.resolve();
+    const jobs = [c.setVolume(volume)];
+    if (brightOK) jobs.push(c.setBrightness(bright));
+    return Promise.all(jobs).catch((err) => console.error(err));
+  }
+  function fromPoint(cx, cy) {
+    const r = root.getBoundingClientRect();
+    volume = clamp(((cx - r.left) / Math.max(1, r.width)) * 100);
+    if (brightOK) bright = clamp((1 - (cy - r.top) / Math.max(1, r.height)) * 100);
+    paint();
+    queueRoom();
+  }
+  function note(down) {
+    const c = ctl();
+    if (c) c.noteDrag(down).catch(() => {});
+  }
+  function idle() {
+    const c = ctl();
+    if (c) c.noteIdle().catch(() => {});
+  }
+
+  root.addEventListener("pointerdown", (e) => {
+    if (e.button !== 0) return;
+    if (e.target.closest(".lights, .radio, .lamp, .mic, .tag, .drop, .swatch")) return;
+    drag = "room";
+    root.classList.add("dragging");
+    root.setPointerCapture(e.pointerId);
+    root.focus({ preventScroll: true });
+    note(true);
+    fromPoint(e.clientX, e.clientY);
+  });
+  root.addEventListener("pointermove", (e) => {
+    if (drag === "room") fromPoint(e.clientX, e.clientY);
+  });
+  function endRoom() {
+    if (drag !== "room") return;
+    drag = null;
+    root.classList.remove("dragging");
+    note(false);
+    idle();
+    flushRoom().then(() => {
+      if (volume > 0 && rows["output.level"]) rows["output.level"].muted = false;
+      return refresh();
+    });
+  }
+  root.addEventListener("pointerup", endRoom);
+  root.addEventListener("pointercancel", endRoom);
+
+  root.addEventListener("keydown", (e) => {
+    const step = e.shiftKey ? 10 : 2;
+    if (e.key === "ArrowLeft") volume = clamp(volume - step);
+    else if (e.key === "ArrowRight") volume = clamp(volume + step);
+    else if (e.key === "ArrowUp" && brightOK) bright = clamp(bright + step);
+    else if (e.key === "ArrowDown" && brightOK) bright = clamp(bright - step);
+    else return;
+    e.preventDefault();
+    paint();
+    queueRoom();
+  });
+  root.addEventListener("keyup", (e) => {
+    if (!e.key.startsWith("Arrow")) return;
+    flushRoom().then(refresh);
+  });
+
+  // A wrapper twist. progress 0 is open, 1 is wrapped. A drag follows the
+  // pointer and settles to the end it has passed; a click flips. A press
+  // during the settle takes over from wherever the paper is.
+  function makeTwist(el, opts) {
+    let p = 0;
+    let raf = 0;
+    let holding = false;
+    let gen = 0;
+    const render = () => el.style.setProperty("--twist", p.toFixed(3));
+    function go(target) {
+      cancelAnimationFrame(raf);
+      const from = p;
+      const dur = calm ? 0 : 240 * Math.abs(target - from);
+      const t0 = performance.now();
+      const step = (now) => {
+        if (holding) return;
+        const k = dur === 0 ? 1 : Math.min(1, (now - t0) / dur);
+        p = from + (target - from) * k;
+        render();
+        if (k < 1) raf = requestAnimationFrame(step);
+      };
+      raf = requestAnimationFrame(step);
+    }
+    function place(wrapped) {
+      cancelAnimationFrame(raf);
+      p = wrapped ? 1 : 0;
+      render();
+    }
+    el.addEventListener("pointerdown", (e) => {
+      if (e.button !== 0 || !opts.enabled()) return;
+      e.stopPropagation();
+      e.preventDefault();
+      holding = true;
+      cancelAnimationFrame(raf);
+      const mine = ++gen;
+      const startX = e.clientX;
+      const startP = p;
+      const was = opts.latched();
+      const latched = was === null ? startP >= 0.5 : was;
+      let maxMove = 0;
+      el.setPointerCapture(e.pointerId);
+      const move = (ev) => {
+        maxMove = Math.max(maxMove, Math.abs(ev.clientX - startX));
+        p = Math.min(1, Math.max(0, startP + (ev.clientX - startX) / 96));
+        render();
+      };
+      const up = () => {
+        holding = false;
+        el.removeEventListener("pointermove", move);
+        el.removeEventListener("pointerup", up);
+        el.removeEventListener("pointercancel", up);
+        const target = maxMove < 8 ? (latched ? 0 : 1) : p >= 0.5 ? 1 : 0;
+        go(target);
+        if (target === 1 === latched) return;
+        opts.commit(target === 1).catch((err) => {
+          console.error(err);
+          if (mine === gen) go(latched ? 1 : 0);
+        });
+      };
+      el.addEventListener("pointermove", move);
+      el.addEventListener("pointerup", up);
+      el.addEventListener("pointercancel", up);
+    });
+    el.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter" && e.key !== " ") return;
+      if (!opts.enabled()) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const was = opts.latched();
+      const latched = was === null ? p >= 0.5 : was;
+      const target = latched ? 0 : 1;
+      go(target);
+      opts.commit(target === 1).catch((err) => {
+        console.error(err);
+        go(latched ? 1 : 0);
+      });
+    });
+    return {
+      sync() {
+        if (holding) return;
+        const was = opts.latched();
+        if (was === null) return;
+        el.setAttribute("aria-checked", was ? "false" : "true");
+        if ((p >= 0.5) !== was) go(was ? 1 : 0);
+        else if (el.style.getPropertyValue("--twist") === "") place(was);
+      },
+      place,
+    };
+  }
+
+  const wifiTwist = makeTwist($(".lights"), {
+    latched: () => (rows["wifi.power"] ? !rows["wifi.power"].on : null),
+    enabled: () => {
+      const row = rows["wifi.power"];
+      return !row || !!row.available;
+    },
+    commit: (wrapped) => {
+      const c = ctl();
+      if (!c || !rows["wifi.power"]) return Promise.resolve();
+      rows["wifi.power"].on = !wrapped;
+      return c.setControl("wifi.power", { on: !wrapped }).then(refresh);
+    },
+  });
+  const muteTwist = makeTwist($(".radio"), {
+    latched: () => (rows["output.level"] ? !!rows["output.level"].muted : null),
+    enabled: () => {
+      const row = rows["output.level"];
+      return !row || (!!row.available && row.adjustable !== false);
+    },
+    commit: (wrapped) => {
+      const c = ctl();
+      if (!c || !rows["output.level"]) return Promise.resolve();
+      rows["output.level"].muted = wrapped;
+      return c.setControl("output.level", { muted: wrapped }).then(refresh);
+    },
+  });
+  const capTwist = makeTwist($(".cap"), {
+    latched: () => (rows["input.level"] ? !!rows["input.level"].muted : null),
+    enabled: () => {
+      const row = rows["input.level"];
+      return !row || (!!row.available && row.adjustable !== false);
+    },
+    commit: (wrapped) => {
+      const c = ctl();
+      if (!c || !rows["input.level"]) return Promise.resolve();
+      rows["input.level"].muted = wrapped;
+      return c.setControl("input.level", { muted: wrapped }).then(refresh);
+    },
+  });
+
+  function levelDrag(el, id, onPercent) {
+    el.addEventListener("pointerdown", (e) => {
+      if (e.button !== 0) return;
+      if (e.target.closest(".cap")) return;
+      const row = rows[id];
+      if (row && (!row.available || row.adjustable === false)) return;
+      e.stopPropagation();
+      e.preventDefault();
+      drag = id;
+      el.setPointerCapture(e.pointerId);
+      note(true);
+      let queued = false;
+      let pending = null;
+      const send = (percent) => {
+        pending = percent;
+        if (queued) return;
+        queued = true;
+        requestAnimationFrame(() => {
+          queued = false;
+          const value = pending;
+          pending = null;
+          const c = ctl();
+          if (value == null || !c || !rows[id]) return;
+          c.setControl(id, { percent: value }).catch((err) => console.error(err));
+        });
+      };
+      const move = (ev) => {
+        const box = root.getBoundingClientRect();
+        const percent = clamp((1 - (ev.clientY - box.top) / Math.max(1, box.height)) * 100);
+        if (rows[id]) rows[id].percent = percent;
+        onPercent(percent);
+        send(percent);
+      };
+      const up = () => {
+        if (drag === id) drag = null;
+        el.removeEventListener("pointermove", move);
+        el.removeEventListener("pointerup", up);
+        el.removeEventListener("pointercancel", up);
+        note(false);
+        idle();
+        const last = pending;
+        const c = ctl();
+        const done = last != null && c && rows[id] ? c.setControl(id, { percent: last }) : Promise.resolve();
+        done.then(refresh).catch((err) => console.error(err));
+      };
+      el.addEventListener("pointermove", move);
+      el.addEventListener("pointerup", up);
+      el.addEventListener("pointercancel", up);
+      move(e);
+    });
+  }
+  levelDrag($(".lamp"), "keyboard.level", (percent) => {
+    root.style.setProperty("--key", (percent / 100).toFixed(3));
+    $(".lamp").setAttribute("aria-valuenow", String(percent));
+  });
+  levelDrag($(".stem"), "input.level", (percent) => {
+    root.style.setProperty("--mic", (percent / 100).toFixed(3));
+    $(".stem").setAttribute("aria-valuenow", String(percent));
+  });
+
+  $(".tag").addEventListener("pointerdown", (e) => {
+    if (e.button !== 0 || $(".tag").classList.contains("dead")) return;
+    e.stopPropagation();
+    const x = e.clientX;
+    const y = e.clientY;
+    const up = (ev) => {
+      $(".tag").removeEventListener("pointerup", up);
+      if (Math.hypot(ev.clientX - x, ev.clientY - y) > 8) return;
+      const row = rows["output.device"];
+      const c = ctl();
+      if (!row || !c || !(row.options || []).length) return;
+      const i = row.options.findIndex((o) => o.id === row.selected);
+      const next = row.options[(i + 1) % row.options.length];
+      c.setControl("output.device", { selected: next.id }).then(refresh).catch((err) => console.error(err));
+    };
+    $(".tag").addEventListener("pointerup", up);
+  });
+
+  root.querySelectorAll(".drop").forEach((el) => {
+    el.addEventListener("pointerdown", (e) => {
+      if (e.button !== 0 || el.classList.contains("dead")) return;
+      e.stopPropagation();
+      e.preventDefault();
+      el.classList.add("down");
+      el.setPointerCapture(e.pointerId);
+      const row = rows[el.dataset.act];
+      const c = ctl();
+      if (row && row.available && c) c.setControl(el.dataset.act, {}).catch((err) => console.error(err));
+      const up = () => {
+        el.classList.remove("down");
+        el.removeEventListener("pointerup", up);
+        el.removeEventListener("pointercancel", up);
+      };
+      el.addEventListener("pointerup", up);
+      el.addEventListener("pointercancel", up);
+    });
+  });
+
+  root.querySelectorAll(".swatch").forEach((el) => {
+    el.addEventListener("pointerdown", (e) => {
+      if (e.button !== 0 || el.classList.contains("dead")) return;
+      e.stopPropagation();
+      const id = el.dataset.look;
+      const up = (ev) => {
+        el.removeEventListener("pointerup", up);
+        if (ev.target !== el && !el.contains(ev.target)) return;
+        const row = rows.appearance;
+        const c = ctl();
+        if (!row || !c || !row.available) return;
+        if (row.options && row.options.length && !row.options.some((o) => o.id === id)) return;
+        c.setControl("appearance", { selected: id }).then(refresh).catch((err) => console.error(err));
+      };
+      el.addEventListener("pointerup", up);
+    });
+  });
+
+  function onState(change) {
+    if (drag || disposed || !change || change.source !== "external") return;
+    if (typeof change.volume === "number") volume = clamp(change.volume);
+    if (brightOK && typeof change.brightness === "number") bright = clamp(change.brightness);
+    paint();
+    if (typeof change.volume === "number") refresh();
+  }
+  const offState = window.events && window.events.stateChanged && window.events.stateChanged.on(onState);
+  const host = root.parentElement;
+  if (host) {
+    const prev = host._sceneCleanup;
+    host._sceneCleanup = () => {
+      disposed = true;
+      clearTimeout(roomTimer);
+      if (typeof offState === "function") offState();
+      if (typeof prev === "function") prev();
+    };
+  }
+
+  paint();
+  const c = ctl();
+  if (!c) return;
+  c.getState()
+    .then((state) => {
+      volume = clamp(state.volume);
+      brightOK = !!state.brightnessAvailable;
+      bright = brightOK ? clamp(state.brightness) : 50;
+    })
+    .catch((err) => console.error(err))
+    .then(refresh);
+})();
+</script>
