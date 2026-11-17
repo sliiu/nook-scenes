@@ -1,8 +1,0 @@
-{
-  "id": "candy",
-  "name": "糖屋",
-  "version": "2.0.0",
-  "description": "一间黏土糖屋：拖地板调音量和亮度，拉窗帘换外观，点音响和麦克风静音，吊灯管 Wi-Fi，唱机三个键管上一首、播放和下一首。",
-  "htmlSha256": "33b0ae8b7385a054a3e04a7d11b6528323d1add5008c5fcc0ad5b9edebfb9999",
-  "author": "Nook"
-}

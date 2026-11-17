@@ -52,24 +52,8 @@
         height: 34px;
         border: 2px solid var(--line);
         border-radius: 8px;
-        background: var(--ink);
         box-shadow: 2px 2px 0 var(--ink);
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 3px;
-        padding: 6px;
-      }
-      .logo i {
-        background: var(--accent);
-      }
-      .logo i:nth-child(2) {
-        background: #ffd36b;
-      }
-      .logo i:nth-child(3) {
-        background: #6a80b4;
-      }
-      .logo i:nth-child(4) {
-        background: #7bd88f;
+        image-rendering: pixelated;
       }
       header h1 {
         margin: 0;
@@ -193,7 +177,7 @@
   </head>
   <body>
     <header>
-      <div class="logo" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      <img class="logo" src="https://raw.githubusercontent.com/sliiu/nook/main/.github/logo-256.png" alt="" />
       <h1>Nook<small>scenes</small></h1>
       <nav><a href="https://github.com/sliiu/nook-scenes">GitHub</a></nav>
     </header>
