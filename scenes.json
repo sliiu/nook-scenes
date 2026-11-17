@@ -3,7 +3,7 @@
     {
       "id": "farm",
       "name": "农场",
-      "version": "1.1.1",
+      "version": "1.1.2",
       "description": "一块卡通田：点地块播种加 5% 音量、收割减 5%，点南瓜静音，点天气牌切浅色、深色和自动。",
       "author": "Nook",
       "preview": "scenes/farm/preview.png"
