@@ -1,8 +1,8 @@
 {
   "id": "farm",
   "name": "农场",
-  "version": "1.0.0",
-  "description": "一块卡通田：点地块播种加 5% 音量、收割减 5%，点南瓜静音，点天空在早晨、夜晚和系统时间之间切换。",
-  "htmlSha256": "d2241e901e8b3ee5c5d0709c09d933d2fdf5f216d6739dce9081ed583c5ba373",
+  "version": "1.1.0",
+  "description": "一块卡通田：点地块播种加 5% 音量、收割减 5%，点南瓜静音，点天空在早晨、夜晚和系统时间之间切换，点天气牌切浅色、深色和自动。",
+  "htmlSha256": "f7a0cf48adb1a7340d2bf276744e9bc9205c1b6e5e1896ccd83403d03de0efd5",
   "author": "Nook"
 }
