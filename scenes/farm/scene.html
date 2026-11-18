@@ -164,7 +164,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    height: 60%;
+    height: 73.333%;
     z-index: 1;
     overflow: hidden;
   }
@@ -184,7 +184,7 @@
   .field-panel {
     position: absolute;
     left: 50%;
-    bottom: 30%;
+    bottom: 34%;
     width: 86%;
     transform: translateX(-50%);
     background: linear-gradient(180deg, #c8925a 0%, #a67c52 100%);
@@ -252,7 +252,7 @@
   .farm-top-left {
     position: absolute;
     left: 10px;
-    top: 32%;
+    top: 21.3%;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -454,7 +454,7 @@
   /* 田下一排：亮度、麦克风、收音机、Wi-Fi。本机没有的藏起来。 */
   .yard {
     position: absolute;
-    top: calc(40% + 70% * 0.6 - 16px);
+    top: calc(26.667% + 73.333% * 0.6 + 33px);
     left: 50%;
     transform: translateX(-50%);
     z-index: 8;
@@ -674,7 +674,7 @@
 
   // 一天 24 小时沿一条弧线走完：东升，正午到顶，西沉。
   // 18 点起太阳沉下去，月亮从弧线东端升起，接同一条轨迹。
-  const ARC = { left: 6, right: 78, top: 3, bottom: 30 };
+  const ARC = { left: 6, right: 78, top: 2, bottom: 20 };
   const DAY_START = 6;
   const DAY_END = 18;
   // 8 点太阳在弧线东侧，21 点月亮在弧线西侧，天空已经全黑
