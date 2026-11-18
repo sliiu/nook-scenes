@@ -3,8 +3,8 @@
     {
       "id": "farm",
       "name": "农场",
-      "version": "1.2.1",
-      "description": "一块卡通田：播种加 5% 音量、收割减 5%，南瓜静音，天气牌切外观，灯调亮度，鸡管麦克风，收音机切歌，风车开关 Wi-Fi。",
+      "version": "1.3.0",
+      "description": "一块卡通田：播种加 5% 音量、收割减 5%，南瓜静音，天气牌切外观，灯调亮度，鸡管麦克风，收音机切歌，风车开关 Wi-Fi。静音和每块田种的什么在下次打开时还在。",
       "author": "Nook",
       "preview": "scenes/farm/preview.png"
     },
