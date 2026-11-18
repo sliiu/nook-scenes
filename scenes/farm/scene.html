@@ -1058,17 +1058,24 @@
     // 先记下，等田铺完再显示。铺田时音量没变，不能把静音清掉。
     let wasMuted = null;
     if (c) {
-      try {
-        const volume = await c.getVolume();
+      // 每一项单独读。一项读失败不能把已经读到的藏起来，
+      // 音量读失败也不能挡住下面的麦克风、收音机、Wi-Fi 和外观。
+      const read = async (fn) => {
+        try { return await fn(); } catch (err) { console.error(err); return null; }
+      };
+      const volume = await read(() => c.getVolume());
+      if (volume) {
         level = Math.max(0, Math.min(100, Math.round(volume.level)));
         wasMuted = !!volume.muted;
-        const state = await c.getState();
-        if (state.brightnessAvailable) {
-          bright = Math.max(0, Math.min(100, Math.round(state.brightness)));
-          brightReady = true;
-        }
-        const listed = await c.listControls();
-        const byId = (id) => (listed || []).find((item) => item.id === id);
+      }
+      const state = await read(() => c.getState());
+      if (state && state.brightnessAvailable) {
+        bright = Math.max(0, Math.min(100, Math.round(state.brightness)));
+        brightReady = true;
+      }
+      const listed = await read(() => c.listControls());
+      if (listed) {
+        const byId = (id) => listed.find((item) => item.id === id);
         const lookRow = byId("appearance");
         if (lookRow && lookRow.available && LOOKS.some((item) => item.id === lookRow.selected)) {
           look = lookRow.selected;
@@ -1088,8 +1095,6 @@
           const row = byId("media." + key);
           return row && row.available;
         });
-      } catch (err) {
-        console.error(err);
       }
     }
     // 浏览器里直接打开没有桥，四项都露出来，只改页面。
