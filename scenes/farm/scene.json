@@ -1,9 +1,9 @@
 {
   "id": "farm",
   "name": "农场",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "一块卡通田：播种加 5% 音量、收割减 5%，南瓜静音，天气牌切外观，灯调亮度，鸡管麦克风，收音机切歌，风车开关 Wi-Fi。",
-  "htmlSha256": "f3dd59f2f7d623540b46bafd02954d627b3ba6ea17501c70976fde1fee3ae3ba",
+  "htmlSha256": "cf6732657246c233939d8036908969de997fcbcba78a201741ce325aa128d073",
   "author": "Nook",
   "preview": "preview.png"
 }
